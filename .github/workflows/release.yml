@@ -48,28 +48,22 @@ jobs:
           set -euo pipefail
           bin="target/aarch64-apple-darwin/release/lstui"
           test -f "$bin"
-          identity_line=$(
+          IDENTITY=$(
             security find-identity -v -p codesigning \
               | grep "Developer ID Application" \
               | grep "(${APPLE_TEAM_ID})" \
-              | head -1
+              | head -1 \
+              | sed 's/.*"\(.*\)".*/\1/'
           )
 
-          if [ -z "${identity_line:-}" ]; then
+          if [ -z "${IDENTITY:-}" ]; then
             echo "No Developer ID Application identity for team: ${APPLE_TEAM_ID}" >&2
             security find-identity -v -p codesigning || true
             exit 1
           fi
 
-          identity_sha="$(echo "$identity_line" | awk '{print $2}')"
-          if ! [[ "${identity_sha:-}" =~ ^[0-9A-F]{40}$ ]]; then
-            echo "Invalid identity SHA extracted: ${identity_sha:-<empty>}" >&2
-            echo "Line: $identity_line" >&2
-            exit 1
-          fi
-
-          echo "Signing with: $identity_line"
-          codesign --force --options runtime --sign "$identity_sha" "$bin"
+          echo "Signing with: $IDENTITY"
+          codesign --force --options runtime --sign "$IDENTITY" "$bin"
           codesign --verify --verbose "$bin"
 
       - name: Notarize binary
