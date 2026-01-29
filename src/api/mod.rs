@@ -1,4 +1,5 @@
 mod client;
+mod rate_limiter;
 mod types;
 
 pub use client::LobstersClient;

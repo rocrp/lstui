@@ -30,15 +30,15 @@ pub async fn run(cli: Cli) -> Result<()> {
     let (tx, mut rx) = mpsc::unbounded_channel::<AppEvent>();
     let mut app = App::new(cli, client, tx.clone(), state_store.clone());
 
-    if let Some(store) = &state_store {
-        if let Some(state) = store.load_story_list_state().await? {
-            app.restore_story_list_state(
-                state.feed,
-                state.next_page,
-                state.end_reached,
-                state.stories,
-            );
-        }
+    if let Some(store) = &state_store
+        && let Some(state) = store.load_story_list_state().await?
+    {
+        app.restore_story_list_state(
+            state.feed,
+            state.next_page,
+            state.end_reached,
+            state.stories,
+        );
     }
 
     app.refresh_stories();
@@ -86,17 +86,17 @@ pub async fn run(cli: Cli) -> Result<()> {
     }
 
     drop(tui);
-    if let Some(store) = &state_store {
-        if !app.stories.is_empty() {
-            store
-                .save_story_list_state(
-                    app.cli.feed.path().to_string(),
-                    app.story_next_page,
-                    app.story_end_reached,
-                    app.stories.clone(),
-                )
-                .await?;
-        }
+    if let Some(store) = &state_store
+        && !app.stories.is_empty()
+    {
+        store
+            .save_story_list_state(
+                app.cli.feed.path().to_string(),
+                app.story_next_page,
+                app.story_end_reached,
+                app.stories.clone(),
+            )
+            .await?;
     }
 
     Ok(())

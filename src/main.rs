@@ -88,12 +88,12 @@ fn ui_config_candidates(cli: &Cli) -> Vec<PathBuf> {
         candidates.push(cwd);
     }
 
-    if let Ok(exe_path) = std::env::current_exe() {
-        if let Some(exe_dir) = exe_path.parent() {
-            let exe_cfg = exe_dir.join("ui-config.toml");
-            if !candidates.contains(&exe_cfg) {
-                candidates.push(exe_cfg);
-            }
+    if let Ok(exe_path) = std::env::current_exe()
+        && let Some(exe_dir) = exe_path.parent()
+    {
+        let exe_cfg = exe_dir.join("ui-config.toml");
+        if !candidates.contains(&exe_cfg) {
+            candidates.push(exe_cfg);
         }
     }
 

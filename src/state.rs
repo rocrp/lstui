@@ -63,13 +63,12 @@ impl StateStore {
 }
 
 fn now_unix() -> Result<i64> {
-    let dur = SystemTime::now()
+    SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .context("system time before unix epoch")?;
-    Ok(dur
+        .context("system time before unix epoch")?
         .as_secs()
         .try_into()
-        .context("unix seconds overflow i64")?)
+        .context("unix seconds overflow i64")
 }
 
 async fn atomic_write(path: &Path, bytes: &[u8]) -> Result<()> {

@@ -203,6 +203,6 @@ fn open_story(story: &crate::api::Story) -> Result<()> {
 }
 
 fn open_story_comments(story: &crate::api::Story) -> Result<()> {
-    open::that(story.comments_url.to_string()).context("open comments in browser")?;
+    open::that(&story.comments_url).context("open comments in browser")?;
     Ok(())
 }

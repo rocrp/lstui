@@ -150,10 +150,7 @@ pub fn render(frame: &mut Frame, app: &mut App) {
         let mut spans = vec![
             Span::styled(format!("{} pts", story.score), score_style),
             Span::raw(format!(" by {} ", story.by)),
-            Span::styled(
-                format!("{age}"),
-                Style::default().fg(theme::palette().subtext0),
-            ),
+            Span::styled(age, Style::default().fg(theme::palette().subtext0)),
             Span::raw(" | "),
             Span::styled(format!("{} comments", story.comment_count), comment_style),
         ];
