@@ -2,6 +2,20 @@
 
 Lobsters TUI (stories + nested comments) via `lobste.rs` JSON endpoints.
 
+## Install
+
+Homebrew (macOS + Linux Homebrew):
+
+```bash
+brew install rocrp/tap/lstui
+```
+
+Linux (no Homebrew):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rocrp/lstui/main/scripts/install.sh | bash
+```
+
 ## Run
 
 ```bash
@@ -41,4 +55,3 @@ Comments:
 - `r`: refresh
 - `?`: help
 - `q` / `Esc`: back
-
