@@ -104,8 +104,10 @@ fn log_file_candidates() -> Vec<PathBuf> {
 
 fn open_log_file_at(path: &Path) -> Result<File> {
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)
-            .with_context(|| format!("create log dir {}", parent.display()))?;
+        if !parent.as_os_str().is_empty() {
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("create log dir {}", parent.display()))?;
+        }
     }
     OpenOptions::new()
         .create(true)
