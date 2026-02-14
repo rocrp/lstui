@@ -1,5 +1,4 @@
 use anyhow::{Context, Result, anyhow};
-use directories::{BaseDirs, ProjectDirs};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -13,13 +12,14 @@ struct LogState {
 
 static LOG: OnceLock<LogState> = OnceLock::new();
 
-pub fn init() -> Result<()> {
-    let (file, path) = match try_open_log_file() {
-        Ok((file, path)) => (Some(file), Some(path)),
-        Err(err) => {
-            eprintln!("lstui: logging disabled: {err:#}");
-            (None, None)
+pub fn init(log_file: Option<PathBuf>) -> Result<()> {
+    let log_file = log_file.or_else(env_log_file);
+    let (file, path) = match log_file {
+        Some(path) => {
+            let file = open_log_file_at(&path)?;
+            (Some(file), Some(path))
         }
+        None => (None, None),
     };
 
     LOG.set(LogState {
@@ -69,37 +69,13 @@ fn unix_ts() -> u64 {
         .as_secs()
 }
 
-fn try_open_log_file() -> Result<(File, PathBuf)> {
-    let mut last_err: Option<anyhow::Error> = None;
-    for path in log_file_candidates() {
-        match open_log_file_at(&path) {
-            Ok(file) => return Ok((file, path)),
-            Err(err) => last_err = Some(err),
-        }
+fn env_log_file() -> Option<PathBuf> {
+    let path = std::env::var("LSTUI_LOG_FILE").ok()?;
+    let path = path.trim();
+    if path.is_empty() {
+        return None;
     }
-    Err(last_err.unwrap_or_else(|| anyhow!("no log file candidates")))
-}
-
-fn log_file_candidates() -> Vec<PathBuf> {
-    let mut out = Vec::new();
-
-    if let Ok(path) = std::env::var("LSTUI_LOG_FILE") {
-        let path = path.trim();
-        if !path.is_empty() {
-            out.push(PathBuf::from(path));
-        }
-    }
-
-    if let Some(proj) = ProjectDirs::from("dev", "lstui", "lstui") {
-        out.push(proj.cache_dir().join("lstui.log"));
-    }
-
-    if let Some(base) = BaseDirs::new() {
-        out.push(base.cache_dir().join("lstui/lstui.log"));
-    }
-
-    out.push(PathBuf::from("lstui.log"));
-    out
+    Some(PathBuf::from(path))
 }
 
 fn open_log_file_at(path: &Path) -> Result<File> {
