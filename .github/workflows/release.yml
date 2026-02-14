@@ -143,10 +143,33 @@ jobs:
           path: dist/*.tar.gz
           if-no-files-found: error
 
+  smoke-arch:
+    needs:
+      - build-linux
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install deps
+        run: pacman -Sy --noconfirm --needed ca-certificates tar gzip
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-amd64
+          path: dist
+
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          tar -xzf dist/*.tar.gz -C out
+          ./out/lstui --help
+
   publish:
     needs:
       - build-macos
       - build-linux
+      - smoke-arch
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -236,4 +259,3 @@ jobs:
           git add Formula/lstui.rb
           git commit -m "Update lstui to ${version}"
           git push
-

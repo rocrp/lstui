@@ -53,6 +53,7 @@ need curl
 need tar
 need uname
 need mktemp
+need awk
 
 os="$(uname -s)"
 case "$os" in
@@ -96,16 +97,26 @@ bin="$tmp/lstui"
 [[ -f "$bin" ]] || die "archive missing lstui"
 chmod +x "$bin"
 
-mkdir -p "$install_dir" || true
-dest="${install_dir%/}/lstui"
+install_dir="${install_dir%/}"
+if mkdir -p "$install_dir"; then
+  :
+else
+  need sudo
+  sudo mkdir -p "$install_dir"
+fi
+
+dest="${install_dir}/lstui"
 
 if [[ -w "$install_dir" ]]; then
   mv "$bin" "$dest"
 else
   need sudo
-  sudo mkdir -p "$install_dir"
   sudo mv "$bin" "$dest"
 fi
 
 echo "installed: $dest"
 
+case ":${PATH}:" in
+  *":${install_dir}:"*) ;;
+  *) echo "note: add to PATH: ${install_dir}" ;;
+esac
