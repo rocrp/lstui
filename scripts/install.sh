@@ -69,6 +69,10 @@ case "$arch" in
   *) die "unsupported arch: $(uname -m)" ;;
 esac
 
+if [[ "$os" == "linux" && "$arch" == "arm64" ]]; then
+  die "linux arm64 not supported yet"
+fi
+
 tag=""
 if [[ -n "$version" ]]; then
   if [[ "$version" == v* ]]; then
